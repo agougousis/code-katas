@@ -4,9 +4,22 @@ abstract class ItemUpdater
 {
     protected $item;
 
-    public function __construct(Item $item)
+    protected $maxQuality;
+
+    protected $minQuality;
+
+    public function __construct(Item $item, $maxQuality = 50, $minQuality = 0)
     {
+        $this->maxQuality = $maxQuality;
+        $this->minQuality = $minQuality;
+
         $this->item = $item;
+
+        $this->updateSellIn();
+    }
+
+    protected function updateSellIn()
+    {
         $this->item->sell_in--;
     }
 
@@ -17,7 +30,7 @@ class NormalUpdater extends ItemUpdater
 {
     public function update()
     {
-        $this->item->quality = max(0, ($this->item->quality-$this->getQualityDrop()));
+        $this->item->quality = max($this->minQuality, ($this->item->quality-$this->getQualityDrop()));
     }
 
     protected function getQualityDrop()
@@ -32,13 +45,18 @@ class SulfurasUpdater extends ItemUpdater
     {
         // Never decreases in quality
     }
+
+    protected function updateSellIn()
+    {
+        // SellIn does not update for this type of items.
+    }
 }
 
 class BackstageUpdater extends ItemUpdater
 {
     public function update()
     {
-        $this->item->quality = min(50, ($this->item->quality+$this->getQualityIncr()));
+        $this->item->quality = min($this->maxQuality, ($this->item->quality+$this->getQualityIncr()));
     }
 
     protected function getQualityIncr()
@@ -59,7 +77,7 @@ class AgedBrieUpdater extends ItemUpdater
 {
     public function update()
     {
-        $this->item->quality = min(50, ($this->item->quality+$this->getQualityIncr()));
+        $this->item->quality = min($this->maxQuality, ($this->item->quality+$this->getQualityIncr()));
     }
 
     protected function getQualityIncr()
@@ -72,7 +90,7 @@ class ConjuredUpdater extends ItemUpdater
 {
     public function update()
     {
-        $this->item->quality = max(0, ($this->item->quality-$this->getQualityDrop()));
+        $this->item->quality = max($this->minQuality, ($this->item->quality-$this->getQualityDrop()));
     }
 
     protected function getQualityDrop()
