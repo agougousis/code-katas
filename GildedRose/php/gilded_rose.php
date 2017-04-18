@@ -23,6 +23,8 @@ abstract class ItemUpdater
         $this->item->sell_in--;
     }
 
+    abstract protected function getQualityDiff();
+
     abstract function update();
 }
 
@@ -30,12 +32,12 @@ class NormalUpdater extends ItemUpdater
 {
     public function update()
     {
-        $this->item->quality = max($this->minQuality, ($this->item->quality-$this->getQualityDrop()));
+        $this->item->quality = max($this->minQuality, ($this->item->quality+$this->getQualityDiff()));
     }
 
-    protected function getQualityDrop()
+    protected function getQualityDiff()
     {
-        return ($this->item->sell_in < 0)? 2 : 1;
+        return ($this->item->sell_in < 0)? -2 : -1;
     }
 }
 
@@ -50,16 +52,21 @@ class SulfurasUpdater extends ItemUpdater
     {
         // SellIn does not update for this type of items.
     }
+
+    protected function getQualityDiff()
+    {
+        // The quality does not change
+    }
 }
 
 class BackstageUpdater extends ItemUpdater
 {
     public function update()
     {
-        $this->item->quality = min($this->maxQuality, ($this->item->quality+$this->getQualityIncr()));
+        $this->item->quality = min($this->maxQuality, ($this->item->quality+$this->getQualityDiff()));
     }
 
-    protected function getQualityIncr()
+    protected function getQualityDiff()
     {
         if ($this->item->sell_in < 0){
             return -$this->item->quality; // quality should drop to zero after concert
@@ -77,10 +84,10 @@ class AgedBrieUpdater extends ItemUpdater
 {
     public function update()
     {
-        $this->item->quality = min($this->maxQuality, ($this->item->quality+$this->getQualityIncr()));
+        $this->item->quality = min($this->maxQuality, ($this->item->quality+$this->getQualityDiff()));
     }
 
-    protected function getQualityIncr()
+    protected function getQualityDiff()
     {
         return 1;
     }
@@ -90,12 +97,12 @@ class ConjuredUpdater extends ItemUpdater
 {
     public function update()
     {
-        $this->item->quality = max($this->minQuality, ($this->item->quality-$this->getQualityDrop()));
+        $this->item->quality = max($this->minQuality, ($this->item->quality+$this->getQualityDiff()));
     }
 
-    protected function getQualityDrop()
+    protected function getQualityDiff()
     {
-        return ($this->item->sell_in < 0)? 4 : 2;
+        return ($this->item->sell_in < 0)? -4 : -2;
     }
 }
 
