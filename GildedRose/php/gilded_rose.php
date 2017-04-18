@@ -104,6 +104,13 @@ class GildedRose {
 
     private $items;
 
+    private $specialUpdaters = [
+        'Aged Brie'         =>  'AgedBrieUpdater',
+        'Sulfuras'          =>  'SulfurasUpdater',
+        'Backstage passes'  =>  'BackstageUpdater',
+        'Conjured'          =>  'ConjuredUpdater'
+    ];
+
     function __construct($items) {
         $this->items = $items;
     }
@@ -111,22 +118,11 @@ class GildedRose {
     function update_quality()
     {
         foreach ($this->items as &$item) {
-            switch ($item->name) {
-                case 'Aged Brie':
-                    $updater = new AgedBrieUpdater($item);
-                    break;
-                case 'Sulfuras':
-                    $updater = new SulfurasUpdater($item);
-                    break;
-                case 'Backstage passes':
-                    $updater = new BackstageUpdater($item);
-                    break;
-                case 'Conjured':
-                    $updater = new ConjuredUpdater($item);
-                    break;
-                default:
-                    $updater = new NormalUpdater($item);
-            }
+            // If we were in PHP 7 :
+            // $updaterClass = $this->specialUpdaters[$item->name] ?? 'NormalUpdater' ;
+            $updaterClass = isset($this->specialUpdaters[$item->name]) ? $this->specialUpdaters[$item->name] : 'NormalUpdater' ;
+
+            $updater = new $updaterClass($item);
 
             $updater->update();
         }
