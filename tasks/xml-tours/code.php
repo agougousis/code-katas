@@ -20,6 +20,20 @@ function extractMinPrice(\SimpleXMLElement $deps)
 }
 
 /**
+ * Remove html tags and multiple spaces from a string
+ *
+ * @param string $html
+ * @return string
+ */
+function fixString($html)
+{
+    $noTags = html_entity_decode($html);
+    $singleSpace = preg_replace('/[\xA0 ]+/u', " ", $noTags);
+
+    return $singleSpace;
+}
+
+/**
  * Build the text output for a single TOUR element
  *
  * @param \SimpleXMLElement $tour
@@ -28,14 +42,17 @@ function extractMinPrice(\SimpleXMLElement $deps)
 function getTourOutput(\SimpleXMLElement $tour)
 {
     // Get the main fields
-    $title = $tour->Title;
-    $code = $tour->Code;
-    $duration = $tour->Duration;
-    $inclusions = $tour->Inclusions;
+    $title = (string) $tour->Title;
+    $code = (string) $tour->Code;
+    $duration = (int) $tour->Duration;
+    $inclusions = (string) $tour->Inclusions;
+
+    $title = fixString($title);
+    $inclusions = fixString($inclusions);
 
     // Extract the text from CDATA
     $doc = new DOMDocument();
-    $doc->loadHTML((string) $inclusions);
+    $doc->loadHTML($inclusions);
     $inclusionsText = $doc->textContent;
 
     // Calculate the min price
